@@ -1,0 +1,52 @@
+<!-- Main content -->
+<div class="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card card-info">
+					<div class="card-header">
+						<h3 class="card-title">Quick Example</h3>
+					</div>
+					<!-- /.card-header -->
+					<!-- form start -->
+					<form>
+						<div class="card-body">
+							<div class="form-row">
+								<div class="form-group col-4">
+									<label>Database</label>
+									<select name="database" class="form-control" [(ngModel)]="scheduleInfo.database">
+										<option *ngFor="let info of databases" [ngValue]="info.id"
+											[attr.disabled]="info.id == 0? true: null">{{info.displayName}}</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-9">
+									<label>Store Percedure</label>
+									<input name="sp" type="text" class="form-control" placeholder="Percedure Name"
+										[(ngModel)]="scheduleInfo.percedureName">
+								</div>
+							</div>
+							<div class="form-row">
+								<div class="form-group col-3">
+									<label>Cron</label>
+									<input name="schedule" type="text" class="form-control" placeholder="Input schedule"
+										[(ngModel)]="scheduleInfo.cron">
+									<small class="text-muted">
+										分 時 日 月 星期
+									</small>
+								</div>
+							</div>
+						</div>
+						<!-- /.card-body -->
+
+						<div class="card-footer">
+							<button type="button" class="btn btn-primary" (click)="createSchedule()">Submit</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<!-- /.row -->
+	</div><!-- /.container-fluid -->
+</div>
