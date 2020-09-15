@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Console;
+using Hangfire.Dashboard;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -32,6 +35,14 @@ namespace LamborScheduler
 						.UseMemoryStorage();
 				})
 				.AddHangfireServer();
+
+			services.Configure<ForwardedHeadersOptions>(options =>
+			{
+				options.ForwardLimit = 3;
+				options.ForwardedHeaders = ForwardedHeaders.All;
+				options.KnownNetworks.Clear();
+				options.KnownProxies.Clear();
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,11 +53,15 @@ namespace LamborScheduler
 				app.UseDeveloperExceptionPage();
 			}
 
+			app.UseForwardedHeaders();
 			app.UseRouting();
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapHangfireDashboard();
+				endpoints.MapHangfireDashboard(new DashboardOptions
+				{
+					Authorization = new IDashboardAuthorizationFilter[0]
+				});
 				endpoints.MapControllers();
 			});
 		}

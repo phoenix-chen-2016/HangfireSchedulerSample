@@ -11,7 +11,7 @@ export class SchedulerService {
 		private http: HttpClient
 	) { }
 
-	addSchedule(db: string, sp: string, cron: string): Observable<any> {
+	addSchedule(db: number, sp: string, cron: string): Observable<any> {
 		return this.http.put(
 			'/api/schedule',
 			{

@@ -5,7 +5,7 @@ namespace LamborScheduler.ViewModels
 	public class ScheduleInfoViewModel
 	{
 		[JsonPropertyName("db")]
-		public string Database { get; set; }
+		public int Database { get; set; }
 
 		[JsonPropertyName("sp")]
 		public string PercedureName { get; set; }
