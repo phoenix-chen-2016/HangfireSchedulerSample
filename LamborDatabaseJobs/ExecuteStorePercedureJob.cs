@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Hangfire.Console;
 using Hangfire.Server;
 using System;
 using System.Threading.Tasks;
@@ -16,8 +17,12 @@ namespace Lambor.Schedule
 
 		public async Task PerformAsync(string description, PerformContext context, PercedureInfo info)
 		{
+			context.WriteLine("test");
+
+			context.WriteLine(info.Database);
 			using (var cn = m_DbConnectionFactory.GetDbConnection(info.Database))
 			{
+
 				await cn.ExecuteAsync(
 					info.PercedureName,
 					commandType: System.Data.CommandType.StoredProcedure).ConfigureAwait(false);

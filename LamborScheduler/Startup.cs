@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.Dashboard;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace LamborScheduler
 {
@@ -25,24 +20,40 @@ namespace LamborScheduler
 			services.AddControllers();
 
 			services
-				.AddLamborHangfireDbJobs((options, sp) => { })
-				.AddHangfire(config =>
+				.AddOptions<HangfireOptions>()
+				.Configure<IConfiguration>((options, config) =>
 				{
+					config.GetSection("Hangfire").Bind(options);
+				})
+				.Services
+				.AddLamborHangfireDbJobs((options, sp) =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
+
+					config.GetSection("LamborConnection").Bind(options);
+				})
+				.AddHangfire((sp, config) =>
+				{
+					var options = sp.GetRequiredService<IOptions<HangfireOptions>>().Value;
+
 					config
 						.UseSimpleAssemblyNameTypeSerializer()
 						.UseRecommendedSerializerSettings()
-						.UseConsole()
-						.UseMemoryStorage();
+						.UseConsole();
+
+					if (options.UseMemory)
+						config.UseMemoryStorage();
+					else
+					{
+						config.UseRedisStorage(
+							options.RedisConnectionString,
+							new Hangfire.Redis.RedisStorageOptions
+							{
+								Db = options.RedisDbIndex
+							});
+					}
 				})
 				.AddHangfireServer();
-
-			services.Configure<ForwardedHeadersOptions>(options =>
-			{
-				options.ForwardLimit = 3;
-				options.ForwardedHeaders = ForwardedHeaders.All;
-				options.KnownNetworks.Clear();
-				options.KnownProxies.Clear();
-			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,7 +64,6 @@ namespace LamborScheduler
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseForwardedHeaders();
 			app.UseRouting();
 
 			app.UseEndpoints(endpoints =>
