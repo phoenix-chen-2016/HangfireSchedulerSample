@@ -3,12 +3,12 @@ services:
   pause:
     image: k8s.gcr.io/pause:3.1
   web:
-    image: test
+    image: 192.168.4.112/lambor/scheduler-frontend:20200918092745
     pid: service:pause
     environment:
       - API_HOST=api
     ports:
-      - 1234:80
+      - 8080:80
   api:
-    image: 546390823857.dkr.ecr.ap-northeast-1.amazonaws.com/lambor/scheduler:20200915181111
+    image: 192.168.4.112/lambor/scheduler:20200918092535
     pid: service:pause
